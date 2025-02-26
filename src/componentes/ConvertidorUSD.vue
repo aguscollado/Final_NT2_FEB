@@ -7,11 +7,12 @@
     </label>
 
     <label>
-      Cotización USD: <input type="number" v-model="cotizacion" :readonly="actualizacion">
+      Cotización USD: <input type="number" v-model="cotizacion" :readonly="autoActualizarCotizacion">
     </label>
 
     <label>
-      <input type="checkbox" v-model="autoActualizarCotizacion"> actualizar
+      <input type="checkbox" v-model="autoActualizarCotizacion" @change="autoActualizar">
+      actualizar
     </label>
 
     <p v-if="ultimaActualizacion">
@@ -29,15 +30,14 @@ import axios from 'axios';
 
 export default {
   name: 'src-componentes-pantalla-dolar',
-  data () {
+  data() {
     return {
       pesos: '',
       cotizacion: '',
-      valorConvertido: '', 
-      autoActualizarCotizacion: false, 
-      temporizador: null, 
-      ultimaActualizacion: '' 
-    }
+      autoActualizarCotizacion: false,
+      temporizador: null,
+      ultimaActualizacion: ''
+    };
   },
   watch: {
     autoActualizarCotizacion(valorBool) {
@@ -50,7 +50,7 @@ export default {
   },
   methods: {
     async obtenerCotizacion() {
-      const respuesta = await axios.get('https://api.bluelytics.com.ar/v2/latest')
+      const respuesta = await axios.get('https://api.bluelytics.com.ar/v2/latest');
       this.cotizacion = respuesta.data.blue.value_sell;
       this.ultimaActualizacion = new Date().toLocaleString();
     },
@@ -59,14 +59,21 @@ export default {
       this.obtenerCotizacion();
       this.temporizador = setInterval(() => {
         this.obtenerCotizacion();
-        this.ultimaActualizacion = new Date().toLocaleString();
       }, 2000);
     },
 
-  detenerActualizacion() {
-  clearInterval(this.temporizador);  
-}
+    detenerActualizacion() {
+      clearInterval(this.temporizador);
+      this.temporizador = null;
+    },
 
+    autoActualizar() {
+      if (this.autoActualizarCotizacion) {
+        this.comenzarActualizacion();
+      } else {
+        this.detenerActualizacion();
+      }
+    }
   },
   computed: {
     convertidorPesosADolar() {
@@ -76,9 +83,9 @@ export default {
       return '';
     }
   }
-}
+};
 </script>
 
 <style scoped lang="css">
-  
+
 </style>
